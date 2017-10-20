@@ -13,7 +13,7 @@ use Inhere\Middleware\RequestHandler;
 use Inhere\Middleware\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-require dirname(__DIR__) . '/../../vendor/autoload.php';
+require dirname(__DIR__) . '/../../autoload.php';
 
 $handler = new RequestHandler(
     new Response(),
@@ -27,6 +27,12 @@ $handler = new RequestHandler(
     },
     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
         echo "2 before >>> \n";
+
+        $res = new Response();
+        $res->getBody()->write('end chain');
+
+        return $res;
+
         $res = $handler->handle($request);
         $res->getBody()->write('+node 2');
         echo "2 after <<< \n";

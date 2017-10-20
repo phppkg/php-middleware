@@ -37,12 +37,12 @@ trait MiddlewareAwareTrait
      * Middleware stack lock
      * @var bool
      */
-    protected $middlewareLock = false;
+    protected $locked = false;
 
     /**
      * Add middleware
      * This method prepends new middleware to the application middleware stack.
-     * @param callable $callable Any callable that accepts three arguments:
+     * @param array ...$middleware Any callable that accepts three arguments:
      *                           1. A Request object
      *                           2. A Response object
      *                           3. A "next" middleware callable
@@ -50,25 +50,30 @@ trait MiddlewareAwareTrait
      * @throws RuntimeException         If middleware is added while the stack is dequeuing
      * @throws UnexpectedValueException If the middleware doesn't return a Psr\Http\Message\ResponseInterface
      */
-    protected function addMiddleware(callable $callable)
+    protected function add(...$middleware)
     {
-        if ($this->middlewareLock) {
+        if ($this->locked) {
             throw new RuntimeException('Middleware can’t be added once the stack is dequeuing');
         }
 
         if (null === $this->stack) {
-            $this->seedMiddlewareStack();
+            $this->prepareStack();
         }
 
-        $next = $this->stack->top();
-        $this->stack[] = function (ServerRequestInterface $request, ResponseInterface $response) use ($callable, $next) {
-            $result = $callable($request, $response, $next);
-            if ($result instanceof ResponseInterface === false) {
-                throw new UnexpectedValueException('Middleware must return instance of \Psr\Http\Message\ResponseInterface');
-            }
 
-            return $result;
-        };
+        foreach ($middleware as $item) {
+            $next = $this->stack->top();
+            $this->stack[] = function (ServerRequestInterface $request, ResponseInterface $response) use ($item, $next) {
+                $result = $item($request, $response, $next);
+
+                if ($result instanceof ResponseInterface === false) {
+                    throw new UnexpectedValueException('Middleware must return instance of \Psr\Http\Message\ResponseInterface');
+                }
+
+                return $result;
+            };
+//            $this->stack[] = $item;
+        }
 
         return $this;
     }
@@ -78,14 +83,14 @@ trait MiddlewareAwareTrait
      * @param callable|mixed $kernel The last item to run as middleware
      * @throws RuntimeException if the stack is seeded more than once
      */
-    protected function seedMiddlewareStack(callable $kernel = null)
+    protected function prepareStack(callable $kernel = null)
     {
         if (null !== $this->stack) {
             throw new RuntimeException('MiddlewareStack can only be seeded once.');
         }
 
         // setting the core node use self.
-        if ($kernel === null) {
+        if ($kernel === null && method_exists($this, '__invoke')) {
             $kernel = $this;
         }
 
@@ -103,15 +108,41 @@ trait MiddlewareAwareTrait
     public function callMiddlewareStack(ServerRequestInterface $request, ResponseInterface $response)
     {
         if (null === $this->stack) {
-            $this->seedMiddlewareStack();
+            $this->prepareStack();
         }
 
         /** @var callable $start */
         $start = $this->stack->top();
-        $this->middlewareLock = true;
+        $this->locked = true;
         $response = $start($request, $response);
-        $this->middlewareLock = false;
+        $this->locked = false;
 
         return $response;
     }
+
+    /**
+     * dumpStack
+     * @return  array
+     */
+    public function dumpStack()
+    {
+        return iterator_to_array(clone $this->stack);
+    }
+
+    /**
+     * @return SplStack
+     */
+    public function getStack(): SplStack
+    {
+        return $this->stack;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isLocked(): bool
+    {
+        return $this->locked;
+    }
+
 }

@@ -1,8 +1,8 @@
 {
   "name": "inhere/middleware",
   "type": "library",
-  "description": "the middleware library of the php",
-  "keywords": ["library","middleware","middleware-dispatcher","psr-15"],
+  "description": "the psr-15, psr-7 middleware library of the php",
+  "keywords": ["library","middleware","middleware-dispatcher","psr-15","psr-7"],
   "homepage": "https://github.com/inhere/php-middleware",
   "license": "MIT",
   "authors": [

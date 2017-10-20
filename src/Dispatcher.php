@@ -10,46 +10,63 @@ namespace Inhere\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use RuntimeException;
+use SplStack;
+use SplDoublyLinkedList;
 
 /**
  * Class Dispatcher
+ * @link https://github.com/mindplay-dk/middleware
  * @package Inhere\Middleware
  */
 class Dispatcher implements MiddlewareInterface
 {
     /**
+     * the "resolver" is any callable with a signature like `function (string $name) : MiddlewareInterface`
      * @var callable middleware resolver
      */
     private $resolver;
 
     /**
-     * @var mixed[] unresolved middleware stack
+     * @var \SplStack unresolved middleware stack
      */
     private $stack;
 
     /**
-     * @param array $stack middleware stack (with at least one middleware component)
-     *
-     * @throws \InvalidArgumentException if an empty middleware stack was given
+     * Middleware stack lock
+     * @var bool
      */
-    public function __construct(...$stack)
+    protected $locked = false;
+
+    /**
+     * @param callable|null $resolver
+     */
+    public function __construct(callable $resolver = null)
     {
-        if (count($stack) === 0) {
-            throw new \InvalidArgumentException('an empty middleware stack was given');
-        }
-//        $this->storage = new \SplObjectStorage();
-        $this->stack = $stack;
+        $this->resolver = $resolver;
     }
 
     /**
-     * @param MiddlewareInterface $middleware
+     * @param array ...$middleware accepts MiddlewareInterface, callable
      * @return $this
      */
-    public function add(MiddlewareInterface $middleware)
+    public function add(...$middleware)
     {
-        $this->stack[] = function(ServerRequestInterface $request, RequestHandlerInterface $handler) use ($middleware) {
-            return $middleware->process($request, $handler);
-        };
+        if ($this->locked) {
+            throw new RuntimeException('Middleware can’t be added once the stack is dequeuing');
+        }
+
+        if (null === $this->stack) {
+            $this->prepareStack();
+        }
+
+        // $this->stack[] = function(ServerRequestInterface $request, RequestHandlerInterface $handler) use ($middleware) {
+        //     return $middleware->process($request, $handler);
+        // };
+
+        foreach ($middleware as $item) {
+            $this->stack[] = $item;
+        }
 
         return $this;
     }
@@ -63,9 +80,37 @@ class Dispatcher implements MiddlewareInterface
      */
     public function dispatch(ServerRequestInterface $request)
     {
-        $resolved = $this->resolve(0);
+        // $resolved = $this->resolve(0);
+        $resolved = $this->resolve();
 
-        return $resolved($request);
+        return $resolved->handle($request);
+    }
+
+    public function run(ServerRequestInterface $request)
+    {
+        if (null === $this->stack) {
+            $this->prepareStack();
+        }
+
+        /** @var call $start It is last added. */
+        // $start = $this->stack->top();
+        // var_dump($start);die;
+        // $response = $start->process($request, $this->handler);
+        $handler = $this->handler;
+        $middleware = $this->stack->top();
+        $middleware = $this->resolve($middleware);
+
+        $this->locked = true;
+        if (method_exists($middleware, '__invoke')) {
+            $response = $middleware($request, $handler);
+        } elseif ($middleware instanceof MiddlewareInterface) {
+            $response = $middleware->process($request, $handler);
+        } elseif (is_callable($middleware)) {
+            $response = $middleware($request, $handler);
+        }
+        $this->locked = false;
+
+        return $response;
     }
 
     /**
@@ -73,40 +118,48 @@ class Dispatcher implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler)
     {
-        $this->stack[] = function (ServerRequestInterface $request) use ($handler) {
-            return $handler->handle($request);
-        };
+        debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        var_dump($request, $handler);die;
+        $response = $handler->handle($request);
 
-        $response = $this->dispatch($request);
-        array_pop($this->stack);
+        if (!$response instanceof ResponseInterface) {
+            throw new \HttpInvalidParamException('error response');
+        }
+
+        // $response = $this->dispatch($request);
 
         return $response;
     }
 
-    /**
-     * @param int $index middleware stack index
-     *
-     * @return mixed
-     */
-    private function resolve($index)
+    private function resolve1($middleware)
     {
-        if (!isset($this->stack[$index])) {
-            return function () {
-                throw new \LogicException('unresolved request: middleware stack exhausted with no result');
-            };
+        $middleware = $this->resolver ? ($this->resolver)($middleware) : $middleware; // as-is
+
+        return $middleware;
+    }
+
+    /**
+     * @param mixed $middleware stack index
+     * @return callable
+     */
+    private function resolve()
+    {
+        if ($this->stack->isEmpty()) {
+            return new RequestHandler(function () {
+                throw new \LogicException("unresolved request: middleware stack exhausted with no result");
+            });
         }
 
-        return function (ServerRequestInterface $request) use ($index) {
-            $middleware = $this->resolver
-                ? ($this->resolver)($this->stack[$index])
-                : $this->stack[$index]; // as-is
+        return new RequestHandler(function (ServerRequestInterface $request) {
+            $middleware = $this->stack->bottom();
+            $middleware = $this->resolver ? ($this->resolver)($middleware) : $middleware; // as-is
 
             switch (true) {
                 case $middleware instanceof MiddlewareInterface:
-                    $result = $middleware->process($request, $this->resolve($index + 1));
+                    $result = $middleware->process($request, $this->resolve());
                     break;
                 case is_callable($middleware):
-                    $result = $middleware($request, $this->resolve($index + 1));
+                    $result = $middleware($request, $this->resolve());
                     break;
                 default:
                     $given = gettype($middleware);
@@ -120,7 +173,28 @@ class Dispatcher implements MiddlewareInterface
             }
 
             return $result;
-        };
+        });
+    }
+
+    /**
+     * Seed middleware stack with first callable(setting the core node of the middleware stack)
+     * @param callable|mixed $kernel The last item to run as middleware
+     * @throws RuntimeException if the stack is prepared more than once
+     */
+    protected function prepareStack($kernel = null)
+    {
+        if (null !== $this->stack) {
+            throw new RuntimeException('Middleware stack can only be prepared once.');
+        }
+
+        // setting the core node use self.
+        if ($kernel === null) {
+            $kernel = $this;
+        }
+
+        $this->stack = new SplStack;
+        $this->stack->setIteratorMode(SplDoublyLinkedList::IT_MODE_LIFO | SplDoublyLinkedList::IT_MODE_KEEP);
+        // $this->stack[] = $kernel;
     }
 
     /**
@@ -135,26 +209,9 @@ class Dispatcher implements MiddlewareInterface
         $this->resolver = $resolver;
     }
 
-    public function run(ServerRequestInterface $request) : ResponseInterface
+    public function setHandler(RequestHandlerInterface $handler)
     {
-        $handler = clone $this;
-//        reset($this->stack);
-
-        if (null === key($handler->stack)) {
-//            return $this->responseFactory->createResponse();
-            return null;
-        }
-
-        $middleware = current($handler->stack);
-
-        next($handler->stack);
-
-        $response = $middleware->process($request, $handler);
-
-        if (!$response instanceof ResponseInterface) {
-            throw new \HttpResponseException('error response data');
-        }
-
-        return $response;
+        $this->handler = $handler;
     }
+
 }
