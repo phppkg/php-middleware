@@ -1,0 +1,28 @@
+{
+  "name": "inhere/middleware",
+  "type": "library",
+  "description": "the middleware library of the php",
+  "keywords": ["library","middleware","middleware-dispatcher","psr-15"],
+  "homepage": "https://github.com/inhere/php-middleware",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "inhere",
+      "email": "in.798@qq.com",
+      "homepage": "http://www.yzone.net/"
+    }
+  ],
+  "require": {
+    "php": ">=7.0.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Inhere\\Middleware\\" : "src/"
+    }
+  },
+  "suggest": {
+    "inhere/sroute": "Very lightweight and fast router",
+    "inhere/php-validate": "Very lightweight data validate tool library",
+    "inhere/console": "a lightweight php console application library."
+  }
+}
