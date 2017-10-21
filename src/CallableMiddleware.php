@@ -18,7 +18,7 @@ use Psr\Http\Message\ServerRequestInterface;
 class CallableMiddleware implements MiddlewareInterface
 {
     /** @var callable  */
-    protected $callable;
+    protected $handler;
 
     /**
      * CallableMiddleware constructor.
@@ -26,7 +26,7 @@ class CallableMiddleware implements MiddlewareInterface
      */
     public function __construct(callable $callable)
     {
-        $this->callable = $callable;
+        $this->handler = $callable;
     }
 
     /**
@@ -34,6 +34,7 @@ class CallableMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
-        return ($this->callable)($request, $handler);
+//        return ($this->handler)($request, $handler);
+        return CallableHandler::execute($this->handler, [$request, $handler]);
     }
 }

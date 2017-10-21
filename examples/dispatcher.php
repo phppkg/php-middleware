@@ -5,7 +5,7 @@
  * Date: 2017/10/16
  * Time: 下午11:51
  */
-use Inhere\Http\Request;
+use Inhere\Http\ServerRequest;
 use Inhere\Http\Response;
 use Inhere\Http\Uri;
 use Inhere\Middleware\RequestHandler;
@@ -28,23 +28,24 @@ function func_middleware($request, RequestHandlerInterface $handler)
 
 $dispatcher->add(
     'func_middleware',
-    function ($request, RequestHandlerInterface $handler) {
+    function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
         echo " >>> before 2\n";
         $res = $handler->handle($request);
         echo " after 2 >>>\n";
 
         return $res;
-    // },
-    // function (Request $request) {
-    //     $res = new Response();
-    //     $res->getBody()->write('end'); // abort middleware stack and return the response
-    //     return $res;
+     },
+     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+//         $res = new Response();
+         $res = $handler->handle($request);
+         $res->getBody()->write("\nend\n"); // abort middleware stack and return the response
+         return $res;
     }
 );
 // var_dump($dispatcher);die;
 
-$request = new Request('GET', Uri::createFromString('/home'));
+$request = new ServerRequest('GET', Uri::createFromString('/home'));
 $response = $dispatcher->dispatch($request);
 // $response = $dispatcher->run($request);
 
-// var_dump($response);
+ var_dump((string)$response->getBody());

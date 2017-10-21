@@ -5,7 +5,7 @@
  * Date: 2017/10/16
  * Time: 下午11:51
  */
-use Inhere\Http\Request;
+use Inhere\Http\ServerRequest;
 use Inhere\Http\Response;
 use Inhere\Http\Uri;
 use Inhere\Middleware\MiddlewareAwareTrait;
@@ -15,12 +15,26 @@ use Psr\Http\Message\ServerRequestInterface;
 
 require dirname(__DIR__) . '/../../autoload.php';
 
-$dispatcher = new class {
+$dispatcher = new class implements \Inhere\Middleware\MiddlewareInterface {
     use MiddlewareAwareTrait;
 
     public function run($request)
     {
         return $this->callMiddlewareStack($request);
+    }
+
+    /**
+     * Process an incoming server request and return a response, optionally delegating
+     * response creation to a handler.
+     *
+     * @param ServerRequestInterface $request
+     * @param RequestHandlerInterface $handler
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler)
+    {
+        return $handler->handle($request);
     }
 };
 
@@ -50,7 +64,7 @@ $dispatcher->add(
 );
 // var_dump($dispatcher);die;
 
-$request = new Request('GET', Uri::createFromString('/home'));
+$request = new ServerRequest('GET', Uri::createFromString('/home'));
 //$response = $dispatcher->dispatch($request);
 $response = $dispatcher->run($request);
 

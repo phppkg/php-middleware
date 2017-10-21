@@ -6,7 +6,7 @@
  * Time: 10:43
  */
 
-use Inhere\Http\Request;
+use Inhere\Http\ServerRequest;
 use Inhere\Http\Response;
 use Inhere\Http\Uri;
 use Inhere\Middleware\RequestHandler;

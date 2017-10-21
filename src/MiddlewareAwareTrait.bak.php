@@ -24,7 +24,7 @@ use UnexpectedValueException;
  * class is an implementation detail and is used only inside of the Slim
  * application; it is not visible to—and should not be used by—end users.
  */
-trait MiddlewareAwareTrait
+trait MiddlewareAwareTraitB
 {
     /**
      * Middleware call stack
@@ -50,7 +50,7 @@ trait MiddlewareAwareTrait
      * @throws RuntimeException         If middleware is added while the stack is dequeuing
      * @throws UnexpectedValueException If the middleware doesn't return a Psr\Http\Message\ResponseInterface
      */
-    public function add(...$middleware)
+    protected function add(...$middleware)
     {
         if ($this->locked) {
             throw new RuntimeException('Middleware can’t be added once the stack is dequeuing');
@@ -61,26 +61,16 @@ trait MiddlewareAwareTrait
         }
 
 
-        foreach ($middleware as $mdl) {
+        foreach ($middleware as $item) {
             $next = $this->stack->top();
-            $this->stack[] = function (ServerRequestInterface $request, RequestHandlerInterface $handler) use ($mdl, $next) {
-                // $response = null;
-                $response = $next($request, $handler);
+            $this->stack[] = function (ServerRequestInterface $request, ResponseInterface $response) use ($item, $next) {
+                $result = $item($request, $response, $next);
 
-                // $handler->handle($request);
-
-                if ($mdl instanceof MiddlewareInterface) {
-                    $response = $mdl->process($request, $next);
-
-                } elseif (is_callable($mdl)) {
-                    $response = $mdl($request, $next);
-                }
-
-                if ($response instanceof ResponseInterface === false) {
+                if ($result instanceof ResponseInterface === false) {
                     throw new UnexpectedValueException('Middleware must return instance of \Psr\Http\Message\ResponseInterface');
                 }
 
-                return $response;
+                return $result;
             };
 //            $this->stack[] = $item;
         }
@@ -112,10 +102,10 @@ trait MiddlewareAwareTrait
     /**
      * Call middleware stack
      * @param  ServerRequestInterface $request A request object
-     * param  ResponseInterface $response A response object
+     * @param  ResponseInterface $response A response object
      * @return ResponseInterface
      */
-    public function callMiddlewareStack(ServerRequestInterface $request)
+    public function callMiddlewareStack(ServerRequestInterface $request, ResponseInterface $response)
     {
         if (null === $this->stack) {
             $this->prepareStack();
@@ -124,35 +114,10 @@ trait MiddlewareAwareTrait
         /** @var callable $start */
         $start = $this->stack->top();
         $this->locked = true;
-        $response = $start($request);
+        $response = $start($request, $response);
         $this->locked = false;
 
         return $response;
-    }
-
-    /**
-     * dumpStack
-     * @return  array
-     */
-    public function dumpStack()
-    {
-        return iterator_to_array(clone $this->stack);
-    }
-
-    /**
-     * @return SplStack
-     */
-    public function getStack(): SplStack
-    {
-        return $this->stack;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isLocked(): bool
-    {
-        return $this->locked;
     }
 
 }
