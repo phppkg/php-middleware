@@ -60,7 +60,6 @@ trait MiddlewareAwareTrait
             $this->prepareStack();
         }
 
-
         foreach ($middleware as $mdl) {
             $next = $this->stack->top();
             $this->stack[] = function (ServerRequestInterface $request, RequestHandlerInterface $handler) use ($mdl, $next) {
