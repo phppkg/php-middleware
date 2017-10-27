@@ -19,7 +19,7 @@ use SplDoublyLinkedList;
  * @link https://github.com/mindplay-dk/middleware
  * @package Inhere\Middleware
  */
-class Dispatcher //implements MiddlewareInterface
+class DispatcherB //implements MiddlewareInterface
 {
     /**
      * the "resolver" is any callable with a signature like `function (string $name) : MiddlewareInterface`
