@@ -15,19 +15,21 @@ require dirname(__DIR__) . '/../../autoload.php';
 
 $response = Dispatcher::run([
     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        echo '01';
         $response = $handler->handle($request);
         $response->getBody()->write('3');
 
         return $response;
     },
     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        echo '02';
         $response = $handler->handle($request);
         $response->getBody()->write('2-');
 
         return $response;
     },
     new CallableMiddleware(function ($request, RequestHandlerInterface $handler) {
-        echo '1-';
+        echo '(00)';
 
         return $handler->handle($request);
     }),

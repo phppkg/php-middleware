@@ -9,7 +9,6 @@
 
 use Inhere\Http\HttpFactory;
 use Inhere\Middleware\Delegate;
-use Inhere\Middleware\MiddlewareChain;
 use Inhere\Middleware\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -57,3 +56,19 @@ $chain = new Delegate([
 $request = HttpFactory::createServerRequest('GET', 'http://www.abc.com/home');
 
 $res = $chain->process($request);
+
+/*
+ OUTPUT:
+$ php examples/delegate.php
+>>> 1 before
+>>> 2 before
+>>> 3 before
+>>> 4 before
+ (this is core)
+4 after >>>
+3 after >>>
+2 after >>>
+1 after >>>
+
+
+ */

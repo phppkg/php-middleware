@@ -16,7 +16,6 @@ use Psr\Http\Message\ServerRequestInterface;
 require dirname(__DIR__) . '/../../autoload.php';
 
 $handler = new RequestHandler(
-    new Response(),
     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
         echo "1 before >>> \n";
         $res = $handler->handle($request);
@@ -59,7 +58,7 @@ $handler = new RequestHandler(
 
 //$handler->setResponse(new Response());
 
-$res = $handler->handle(new Request('GET', Uri::createFromString('/home')));
+$res = $handler->handle(new ServerRequest('GET', Uri::createFromString('/home')));
 
 echo PHP_EOL . 'response content: ', (string)$res->getBody() . PHP_EOL;
 

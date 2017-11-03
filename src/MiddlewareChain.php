@@ -8,7 +8,6 @@
 
 namespace Inhere\Middleware;
 
-use LightCms\Base\CallableResolverInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
