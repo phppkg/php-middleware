@@ -14,7 +14,7 @@ use Psr\Http\Message\ServerRequestInterface;
 /**
  * Interface MiddlewareInterface
  * @package Inhere\Middleware
- * @link https://github.com/php-fig/fig-standards/blob/master/proposed/http-middleware/middleware.md
+ * @link https://github.com/php-fig/fig-standards/blob/master/proposed/http-handlers/request-handlers.md
  *
  * An HTTP middleware component participates in processing an HTTP message,
  * either by acting on the request or the response. This interface defines the

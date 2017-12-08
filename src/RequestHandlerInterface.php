@@ -14,7 +14,7 @@ use Psr\Http\Message\ServerRequestInterface;
 /**
  * Interface RequestHandlerInterface
  * @package Inhere\Middleware
- * @link https://github.com/php-fig/fig-standards/blob/master/proposed/http-middleware/middleware.md
+ * @link https://github.com/php-fig/fig-standards/blob/master/proposed/http-handlers/request-handlers.md
  * An HTTP request handler process a HTTP request and produces an HTTP response.
  * This interface defines the methods require to use the request handler.
  */

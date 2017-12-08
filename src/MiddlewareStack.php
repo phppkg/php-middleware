@@ -15,9 +15,9 @@ use Psr\Http\Message\ServerRequestInterface;
  * Class MiddlewareChain
  * @package Inhere\Middleware
  */
-class MiddlewareChain implements RequestHandlerInterface
+class MiddlewareStack implements RequestHandlerInterface
 {
-    use MiddlewareChainAwareTrait;
+    use MiddlewareStackAwareTrait;
 
     /** @var callable */
     private $coreHandler;

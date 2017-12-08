@@ -7,13 +7,32 @@
  */
 
 use Inhere\Http\HttpFactory;
-use Inhere\Middleware\MiddlewareChain;
+use Inhere\Middleware\MiddlewareStack;
 use Inhere\Middleware\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 require dirname(__DIR__) . '/../../autoload.php';
 
-$chain = new MiddlewareChain([
+function func_middleware($request, RequestHandlerInterface $handler)
+{
+    echo ">>> 0 before\n";
+    $res = $handler->handle($request);
+    echo "0 after >>>\n";
+
+    return $res;
+}
+
+function func_middleware1($request, RequestHandlerInterface $handler)
+{
+    echo ">>> n before \n";
+    $res = $handler->handle($request);
+    echo "n after >>>\n";
+
+    return $res;
+}
+
+$chain = new MiddlewareStack([
+    'func_middleware',
     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
         echo ">>> 1 before \n";
         $res = $handler->handle($request);
@@ -45,7 +64,8 @@ $chain = new MiddlewareChain([
         echo "4 after >>> \n";
 
         return $res;
-    }
+    },
+    'func_middleware1'
 ]);
 
 $request = HttpFactory::createServerRequest('GET', 'http://www.abc.com/home');

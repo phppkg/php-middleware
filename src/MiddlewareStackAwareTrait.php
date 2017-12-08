@@ -16,8 +16,9 @@ use Psr\Http\Message\ServerRequestInterface;
  * @package Inhere\Middleware
  *
  * ```php
- *
  * class MyApp implements RequestHandlerInterface {
+ *  use MiddlewareStackAwareTrait;
+ *
  *  public function handleRequest(ServerRequestInterface $request): ResponseInterface
  *  {
  *      return new Response;
@@ -25,9 +26,9 @@ use Psr\Http\Message\ServerRequestInterface;
  * }
  * ```
  */
-trait MiddlewareChainAwareTrait
+trait MiddlewareStackAwareTrait
 {
-    /** @var array */
+    /** @var \SplStack */
     private $stack;
 
     /** @var bool */
@@ -59,6 +60,10 @@ trait MiddlewareChainAwareTrait
             throw new \RuntimeException('Middleware can’t be added once the stack is dequeuing');
         }
 
+        if (null === $this->stack) {
+            $this->prepareStack();
+        }
+
         foreach ($middleware as $item) {
             $this->stack[] = $item;
         }
@@ -85,26 +90,26 @@ trait MiddlewareChainAwareTrait
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        /** @var RequestHandlerInterface $handler */
-        $handler = $this;
+        // $handler = $this;
         // $handler = clone $this;
 
         // IMPORTANT: if no middleware. this is end point of the chain.
-        if (null === key($handler->stack)) {
-            // debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        if ($this->stack->isEmpty()) {
             return $this->handleRequest($request);
         }
 
-        $middleware = current($handler->stack);
-        next($handler->stack);
+        $middleware = $this->stack->shift();
+        // $middleware = current($handler->stack);
+        // next($handler->stack);
 
         if ($middleware instanceof MiddlewareInterface) {
-            $response = $middleware->process($request, $handler);
+            /** @var RequestHandlerInterface $this */
+            $response = $middleware->process($request, $this);
         } elseif (\is_callable($middleware)) {
-            $response = $middleware($request, $handler);
+            $response = $middleware($request, $this);
         } elseif ($this->callableResolver) {
             $middleware = $this->callableResolver->resolve($middleware);
-            $response = $middleware($request, $handler);
+            $response = $middleware($request, $this);
         } else {
             throw new \InvalidArgumentException('The middleware is not a callable.');
         }
@@ -122,6 +127,23 @@ trait MiddlewareChainAwareTrait
      * @return ResponseInterface
      */
     abstract public function handleRequest(ServerRequestInterface $request): ResponseInterface;
+
+    /**
+     * @param callable|null $kernel
+     */
+    protected function prepareStack(callable $kernel = null)
+    {
+        if (null !== $this->stack) {
+            throw new \RuntimeException('MiddlewareStack can only be seeded once.');
+        }
+
+        $this->stack = new \SplStack;
+        $this->stack->setIteratorMode(\SplDoublyLinkedList::IT_MODE_LIFO | \SplDoublyLinkedList::IT_MODE_KEEP);
+
+        if ($kernel) {
+            $this->stack[] = $kernel;
+        }
+    }
 
     /**
      * @return bool
