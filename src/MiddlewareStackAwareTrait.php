@@ -76,8 +76,12 @@ trait MiddlewareStackAwareTrait
      * @return ResponseInterface
      * @throws \InvalidArgumentException
      */
-    public function run(ServerRequestInterface $request)
+    public function callStack(ServerRequestInterface $request)
     {
+        if (null === $this->stack) {
+            $this->prepareStack();
+        }
+
         $this->locked = true;
         $response = $this->handle($request);
         $this->locked = false;

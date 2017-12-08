@@ -2,70 +2,104 @@
 /**
  * Created by PhpStorm.
  * User: inhere
- * Date: 2017/10/16
- * Time: 下午11:51
+ * Date: 2017/10/20
+ * Time: 下午10:04
  */
-use Inhere\Http\ServerRequest;
-use Inhere\Http\Response;
-use Inhere\Http\Uri;
-use Inhere\Middleware\MiddlewareAwareTrait;
-use Inhere\Middleware\RequestHandler;
+
+use Inhere\Http\Body;
+use Inhere\Http\HttpFactory;
+use Inhere\Middleware\MiddlewareStack;
 use Inhere\Middleware\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 require dirname(__DIR__) . '/../../autoload.php';
 
-$dispatcher = new class implements \Inhere\Middleware\MiddlewareInterface {
-    use MiddlewareAwareTrait;
-
-    public function run($request)
-    {
-        return $this->callMiddlewareStack($request);
-    }
-
-    /**
-     * Process an incoming server request and return a response, optionally delegating
-     * response creation to a handler.
-     *
-     * @param ServerRequestInterface $request
-     * @param RequestHandlerInterface $handler
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler)
-    {
-        return $handler->handle($request);
-    }
-};
-
 function func_middleware($request, RequestHandlerInterface $handler)
 {
-    echo " >>> before 1\n";
+    echo ">>> 0 before\n";
     $res = $handler->handle($request);
-    echo " after 1 >>>\n";
+    echo "0 after >>>\n";
 
     return $res;
 }
 
-$dispatcher->add(
+function func_middleware1($request, RequestHandlerInterface $handler)
+{
+    echo ">>> n before \n";
+    $res = $handler->handle($request);
+    echo "n after >>>\n";
+
+    return $res;
+}
+
+$chain = new MiddlewareStack([
     'func_middleware',
-    function ($request, RequestHandlerInterface $handler) {
-        echo " >>> before 2\n";
+    function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        echo ">>> 1 before \n";
         $res = $handler->handle($request);
-        echo " after 2 >>>\n";
+        $res->getBody()->write(' + node 1');
+        echo "1 after >>> \n";
+        return $res;
+    },
+    function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        echo ">>> 2 before \n";
+        $res = $handler->handle($request);
+        $res->getBody()->write(' + node 2');
+        echo "2 after >>> \n";
+        return $res;
+    },
+    function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        echo ">>> 3 before \n";
+        $res = $handler->handle($request);
+        $res->getBody()->write(' + node 3');
+        echo "3 after >>> \n";
+        return $res;
+    },
+    function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+//        $res = HttpFactory::createResponse();
+//        $res->getBody()->write('content');
+
+        echo ">>> 4 before \n";
+        $res = $handler->handle($request);
+        $res->getBody()->write('node 4');
+        echo "4 after >>> \n";
 
         return $res;
-        // },
-        // function (Request $request) {
-        //     $res = new Response();
-        //     $res->getBody()->write('end'); // abort middleware stack and return the response
-        //     return $res;
-    }
-);
-// var_dump($dispatcher);die;
+    },
+    'func_middleware1'
+]);
 
-$request = new ServerRequest('GET', Uri::createFromString('/home'));
-//$response = $dispatcher->dispatch($request);
-$response = $dispatcher->run($request);
+$request = HttpFactory::createServerRequest('GET', 'http://www.abc.com/home');
 
-// var_dump($response);
+$chain->setCoreHandler(function (ServerRequestInterface $request) {
+    echo " (this is core)\n";
+
+    return HttpFactory::createResponse()->write('-CORE-');
+});
+
+$res = $chain($request);
+
+echo PHP_EOL . 'response content: ', (string)$res->getBody() . PHP_EOL;
+
+//var_dump($chain);
+
+/*
+OUTPUT:
+$ php examples/test.php
+>>> 0 before
+>>> 1 before
+>>> 2 before
+>>> 3 before
+>>> 4 before
+>>> n before
+ (this is core)
+n after >>>
+4 after >>>
+3 after >>>
+2 after >>>
+1 after >>>
+0 after >>>
+
+response content: node 4 + node 3 + node 2 + node 1
+
+ */

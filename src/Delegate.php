@@ -8,9 +8,6 @@
 
 namespace Inhere\Middleware;
 
-
-//use Interop\Http\ServerMiddleware\DelegateInterface;
-use Inhere\Http\HttpFactory;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;

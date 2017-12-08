@@ -57,4 +57,15 @@ class MiddlewareStack implements RequestHandlerInterface
     {
         return ($this->coreHandler)($request);
     }
+
+    /**
+     * Dispatch the next available middleware and return the response.
+     * This method duplicates `next()` to provide backwards compatibility with non-PSR 15 middleware.
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function __invoke(ServerRequestInterface $request)
+    {
+        return $this->callStack($request);
+    }
 }

@@ -1,49 +1,11 @@
-# Middleware
+<?php
+/**
+ * Created by PhpStorm.
+ * User: inhere
+ * Date: 2017-12-08
+ * Time: 15:30
+ */
 
-the psr-15 HTTP Middleware implement.
-
-ref https://github.com/php-fig/fig-standards/blob/master/proposed/http-handlers/middleware.md
-
-
-## 项目地址
-
-- **github** https://github.com/inhere/php-middleware.git
-- **git@osc** https://gitee.com/inhere/php-middleware.git
-
-## 安装
-
-- composer 命令
-
-```php
-composer require inhere/middleware
-```
-
-- composer.json
-
-```json
-{
-    "require": {
-        "inhere/middleware": "dev-master"
-    }
-}
-```
-
-- 直接拉取
-
-```bash
-git clone https://github.com/inhere/php-middleware.git // github
-git clone https://gitee.com/inhere/php-middleware.git // git@osc
-```
-
-## 使用
-
-### 一个基于中间件的应用
-
-- 引入相关类
-
-路由器，psr 7的http message 库
-
-```php
 use Inhere\Http\HttpFactory;
 use Inhere\Library\Helpers\Http;
 use Inhere\Middleware\MiddlewareStackAwareTrait;
@@ -52,11 +14,8 @@ use Inhere\Route\ORouter;
 use Inhere\Route\RouterInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-```
 
-- 创建一个应用类
-
-```php
+require dirname(__DIR__) . '/../../autoload.php';
 
 $app = new class implements RequestHandlerInterface {
     use MiddlewareStackAwareTrait;
@@ -112,11 +71,7 @@ $app = new class implements RequestHandlerInterface {
         $this->router = $router;
     }
 };
-```
 
-- 创建路由器并注册路由
-
-```php
 $router = new ORouter();
 
 /**
@@ -130,11 +85,6 @@ $router->get('/hello/{name}', function ($args) {
     echo "hello, {$args['name']}";
 });
 
-```
-
-- 添加中间件
-
-```php
 /**
  * add middleware
  */
@@ -153,41 +103,12 @@ $app->use(function (ServerRequestInterface $request, RequestHandlerInterface $ha
 
     return $res;
 });
-```
 
-- 准备运行
-
-```php
 /**
  * run
  */
 $req = HttpFactory::createServerRequestFromArray($_SERVER);
+// var_dump($_SERVER, $req);die;
 
 $app->setRouter($router);
 $app->run($req);
-```
-
-- 运行server
-
-```bash
-$ php -S 127.0.0.1:8009 examples/app.php
-```
-
-访问： http://127.0.0.1:8009
-
-visit: `/hello/tom` 
-response:
-
-```text
-before handle0 > before handle1 > hello, tom > after handle1 > after handle0
-```
-
-## ref project
-
-- https://github.com/mindplay-dk/middleman
-- https://github.com/middlewares/utils
-- https://github.com/middlewares/psr15-middlewares
-
-## License 
-
-MIT
