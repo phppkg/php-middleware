@@ -63,13 +63,14 @@ class Delegate implements RequestHandlerInterface
         // It there's no middleware use the default callable
         if ($middleware === null) {
             return ($this->default)($request);
+            // return $this->handle($request);
         }
 
         if ($middleware instanceof MiddlewareInterface) {
             return $middleware->process($request, clone $this);
         }
 
-        if (is_callable($middleware)) {
+        if (\is_callable($middleware)) {
             return $middleware($request, $this);
         }
 
@@ -94,6 +95,7 @@ class Delegate implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        // return ($this->default)($request);
         return $this->process($request);
 //        return HttpFactory::createResponse();
     }

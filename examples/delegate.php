@@ -16,21 +16,24 @@ require dirname(__DIR__) . '/../../autoload.php';
 
 $chain = new Delegate([
     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
-        echo ">>> 1 before \n";
+        $hid = spl_object_hash($handler);
+        echo ">>> 1 before: $hid \n";
         $res = $handler->handle($request);
         $res->getBody()->write(' + node 1');
         echo "1 after >>> \n";
         return $res;
     },
     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
-        echo ">>> 2 before \n";
+        $hid = spl_object_hash($handler);
+        echo ">>> 2 before: $hid \n";
         $res = $handler->handle($request);
         $res->getBody()->write(' + node 2');
         echo "2 after >>> \n";
         return $res;
     },
     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
-        echo ">>> 3 before \n";
+        $hid = spl_object_hash($handler);
+        echo ">>> 3 before: $hid \n";
         $res = $handler->handle($request);
         $res->getBody()->write('node 3');
         echo "3 after >>> \n";
@@ -39,8 +42,9 @@ $chain = new Delegate([
     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
 //        $res = HttpFactory::createResponse();
 //        $res->getBody()->write('content');
+        $hid = spl_object_hash($handler);
 
-        echo ">>> 4 before \n";
+        echo ">>> 4 before: $hid \n";
         $res = $handler->handle($request);
         $res->getBody()->write('node 4');
         echo "4 after >>> \n";

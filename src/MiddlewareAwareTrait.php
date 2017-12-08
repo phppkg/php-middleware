@@ -71,7 +71,7 @@ trait MiddlewareAwareTrait
                 if ($mdl instanceof MiddlewareInterface) {
                     $response = $mdl->process($request, $next);
 
-                } elseif (is_callable($mdl)) {
+                } elseif (\is_callable($mdl)) {
                     $response = $mdl($request, $next);
                 }
 

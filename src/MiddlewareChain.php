@@ -87,8 +87,6 @@ class MiddlewareChain implements RequestHandlerInterface
     {
         $this->locked = true;
 
-        // append the core middleware
-//        $this->stack[] = $this->coreHandler ?: $this;
         $response = $this->handle($request);
 
         $this->locked = false;
@@ -106,6 +104,7 @@ class MiddlewareChain implements RequestHandlerInterface
 
         // IMPORTANT: if no middleware. this is end point of the chain.
         if (null === key($handler->stack)) {
+            // debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
             return ($this->coreHandler)($request);
         }
 
@@ -116,7 +115,7 @@ class MiddlewareChain implements RequestHandlerInterface
             $response = $middleware->process($request, $handler);
         } elseif (method_exists($middleware, '__invoke')) {
             $response = $middleware($request, $handler);
-        } elseif (is_callable($middleware)) {
+        } elseif (\is_callable($middleware)) {
             $response = $middleware($request, $handler);
         } elseif ($this->callableResolver) {
             $middleware = $this->callableResolver->resolve($middleware);
@@ -126,7 +125,7 @@ class MiddlewareChain implements RequestHandlerInterface
         }
 
         if (!$response instanceof ResponseInterface) {
-            throw new \UnexpectedValueException('error response');
+            throw new \UnexpectedValueException('Middleware must return instance of \Psr\Http\Message\ResponseInterface');
         }
 
         return $response;
