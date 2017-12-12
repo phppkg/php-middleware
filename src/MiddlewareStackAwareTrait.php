@@ -72,6 +72,7 @@ trait MiddlewareStackAwareTrait
     }
 
     /**
+     * 调用此方法开始执行所有中间件
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      * @throws \InvalidArgumentException
@@ -83,13 +84,18 @@ trait MiddlewareStackAwareTrait
         }
 
         $this->locked = true;
-        $response = $this->handle($request);
+
+        // 保证每次的调用栈是完整且从0开始
+        $that = clone $this;
+        $response = $that->handle($request);
+
         $this->locked = false;
 
         return $response;
     }
 
     /**
+     * 不要在外部直接调用，内部调用的
      * {@inheritDoc}
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
