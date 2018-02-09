@@ -7,11 +7,11 @@
  */
 
 use Inhere\Http\HttpFactory;
-use Inhere\Library\Helpers\Http;
+use Inhere\Http\HttpUtil;
 use Inhere\Middleware\MiddlewareStackAwareTrait;
-use Inhere\Middleware\RequestHandlerInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Inhere\Route\ORouter;
-use Inhere\Route\RouterInterface;
+use Inhere\Route\Base\RouterInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -29,7 +29,7 @@ $app = new class implements RequestHandlerInterface {
     {
         $response = $this->callStack($request);
 
-        Http::respond($response);
+        HttpUtil::respond($response);
     }
 
     /**

@@ -10,6 +10,8 @@ namespace Inhere\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * Trait MiddlewareChainAwareTrait
@@ -125,7 +127,9 @@ trait MiddlewareStackAwareTrait
         }
 
         if (!$response instanceof ResponseInterface) {
-            throw new \UnexpectedValueException('Middleware must return instance of \Psr\Http\Message\ResponseInterface');
+            throw new \UnexpectedValueException(
+                'Middleware must return object and instance of \Psr\Http\Message\ResponseInterface'
+            );
         }
 
         return $response;

@@ -6,11 +6,10 @@
  * Time: 下午10:04
  */
 
-use Inhere\Http\Body;
 use Inhere\Http\HttpFactory;
 use Inhere\Middleware\MiddlewareStack;
-use Inhere\Middleware\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 require dirname(__DIR__) . '/../../autoload.php';
 
@@ -39,6 +38,7 @@ $chain = new MiddlewareStack([
         $res = $handler->handle($request);
         $res->getBody()->write(' + node 1');
         echo "1 after >>> \n";
+
         return $res;
     },
     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
@@ -46,6 +46,7 @@ $chain = new MiddlewareStack([
         $res = $handler->handle($request);
         $res->getBody()->write(' + node 2');
         echo "2 after >>> \n";
+
         return $res;
     },
     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
@@ -53,11 +54,12 @@ $chain = new MiddlewareStack([
         $res = $handler->handle($request);
         $res->getBody()->write(' + node 3');
         echo "3 after >>> \n";
+
         return $res;
     },
     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
-//        $res = HttpFactory::createResponse();
-//        $res->getBody()->write('content');
+       // $res = HttpFactory::createResponse();
+       // $res->getBody()->write('content');
 
         echo ">>> 4 before \n";
         $res = $handler->handle($request);
@@ -71,10 +73,12 @@ $chain = new MiddlewareStack([
 
 $request = HttpFactory::createServerRequest('GET', 'http://www.abc.com/home');
 
-$chain->setCoreHandler(function (ServerRequestInterface $request) {
+$chain->setCoreHandler(function () {
     echo " (this is core)\n";
+    $res = HttpFactory::createResponse();
+    $res->getBody()->write('-CORE-');
 
-    return HttpFactory::createResponse()->write('-CORE-');
+    return $res;
 });
 
 $res = $chain($request);
