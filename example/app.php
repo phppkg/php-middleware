@@ -9,15 +9,16 @@
 use Inhere\Http\HttpFactory;
 use Inhere\Http\HttpUtil;
 use Inhere\Middleware\MiddlewareStackAwareTrait;
-use Psr\Http\Server\RequestHandlerInterface;
-use Inhere\Route\ORouter;
 use Inhere\Route\Base\RouterInterface;
+use Inhere\Route\ORouter;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 require dirname(__DIR__) . '/../../autoload.php';
 
-$app = new class implements RequestHandlerInterface {
+$app = new class implements RequestHandlerInterface
+{
     use MiddlewareStackAwareTrait;
 
     /**
@@ -78,7 +79,7 @@ $router = new ORouter();
  * add routes
  */
 $router->get('/', function () {
-   echo 'hello, world';
+    echo 'hello, world';
 });
 
 $router->get('/hello/{name}', function ($args) {

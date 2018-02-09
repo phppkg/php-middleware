@@ -1,8 +1,8 @@
 # Middleware
 
-the psr-15 HTTP Middleware implement.
+The psr-15 HTTP Middleware implement.
 
-ref https://github.com/php-fig/fig-standards/blob/master/proposed/http-handlers/middleware.md
+ref [PSR 15](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-15-request-handlers.md)
 
 
 ## 项目地址
@@ -129,24 +129,24 @@ n after >>>
 response content: node 4 + node 3 + node 2 + node 1
 ```
 
-### 一个基于中间件的应用
+## 一个基于中间件的应用示例
 
-- 引入相关类
+### 引入相关类
 
 路由器，psr 7的http message 库
 
 ```php
 use Inhere\Http\HttpFactory;
-use Inhere\Library\Helpers\Http;
+use Inhere\Http\HttpUtil;
 use Inhere\Middleware\MiddlewareStackAwareTrait;
-use Inhere\Middleware\RequestHandlerInterface;
+use Inhere\Route\Base\RouterInterface;
 use Inhere\Route\ORouter;
-use Inhere\Route\RouterInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 ```
 
-- 创建一个应用类
+### 创建一个应用类
 
 ```php
 
@@ -206,7 +206,7 @@ $app = new class implements RequestHandlerInterface {
 };
 ```
 
-- 创建路由器并注册路由
+### 创建路由器并注册路由
 
 ```php
 $router = new ORouter();
@@ -224,7 +224,7 @@ $router->get('/hello/{name}', function ($args) {
 
 ```
 
-- 添加中间件
+### 添加中间件
 
 ```php
 /**
@@ -247,7 +247,7 @@ $app->use(function (ServerRequestInterface $request, RequestHandlerInterface $ha
 });
 ```
 
-- 准备运行
+### 准备运行
 
 ```php
 /**
@@ -259,7 +259,7 @@ $app->setRouter($router);
 $app->run($req);
 ```
 
-- 运行server
+### 运行dev server
 
 ```bash
 $ php -S 127.0.0.1:8009 examples/app.php

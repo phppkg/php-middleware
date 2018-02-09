@@ -102,7 +102,6 @@ trait MiddlewareStackAwareTrait
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        // $handler = $this;
         // $handler = clone $this;
 
         // IMPORTANT: if no middleware. this is end point of the chain.
