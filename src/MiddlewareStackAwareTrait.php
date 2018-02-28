@@ -98,6 +98,7 @@ trait MiddlewareStackAwareTrait
 
     /**
      * 不要在外部直接调用，内部调用的
+     * @internal
      * {@inheritDoc}
      */
     public function handle(ServerRequestInterface $request): ResponseInterface

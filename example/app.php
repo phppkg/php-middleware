@@ -79,7 +79,7 @@ $router = new ORouter();
  * add routes
  */
 $router->get('/', function () {
-    echo 'hello, world';
+    echo '(hello, world)';
 });
 
 $router->get('/hello/{name}', function ($args) {
