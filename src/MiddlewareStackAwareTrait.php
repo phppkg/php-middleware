@@ -42,8 +42,9 @@ trait MiddlewareStackAwareTrait
     /**
      * @param callable[] ...$middleware
      * @return $this
+     * @throws \RuntimeException
      */
-    public function use(...$middleware)
+    public function use(...$middleware): self
     {
         return $this->add(...$middleware);
     }
@@ -55,8 +56,9 @@ trait MiddlewareStackAwareTrait
      *                           1. A Request object
      *                           2. A Handler object
      * @return $this
+     * @throws \RuntimeException
      */
-    public function add(...$middleware)
+    public function add(...$middleware): self
     {
         if ($this->locked) {
             throw new \RuntimeException('Middleware can’t be added once the stack is dequeuing');
@@ -77,9 +79,11 @@ trait MiddlewareStackAwareTrait
      * 调用此方法开始执行所有中间件
      * @param ServerRequestInterface $request
      * @return ResponseInterface
+     * @throws \UnexpectedValueException
+     * @throws \RuntimeException
      * @throws \InvalidArgumentException
      */
-    public function callStack(ServerRequestInterface $request)
+    public function callStack(ServerRequestInterface $request): ResponseInterface
     {
         if (null === $this->stack) {
             $this->prepareStack();
@@ -100,6 +104,8 @@ trait MiddlewareStackAwareTrait
      * 不要在外部直接调用，内部调用的
      * @internal
      * {@inheritDoc}
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -144,6 +150,7 @@ trait MiddlewareStackAwareTrait
 
     /**
      * @param callable|null $kernel
+     * @throws \RuntimeException
      */
     protected function prepareStack(callable $kernel = null)
     {

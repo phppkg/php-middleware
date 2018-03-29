@@ -28,6 +28,7 @@ class MiddlewareStack implements RequestHandlerInterface
      * RequestHandler constructor.
      * @param MiddlewareInterface[] $stack
      * @param CallableResolverInterface|null $callableResolver
+     * @throws \RuntimeException
      */
     public function __construct(array $stack = [], CallableResolverInterface $callableResolver = null)
     {
@@ -38,7 +39,7 @@ class MiddlewareStack implements RequestHandlerInterface
     /**
      * @return callable
      */
-    public function getCoreHandler()
+    public function getCoreHandler(): callable
     {
         return $this->coreHandler;
     }
@@ -46,7 +47,7 @@ class MiddlewareStack implements RequestHandlerInterface
     /**
      * @param callable $coreHandler
      */
-    public function setCoreHandler($coreHandler)
+    public function setCoreHandler(callable $coreHandler)
     {
         $this->coreHandler = $coreHandler;
     }
@@ -65,6 +66,7 @@ class MiddlewareStack implements RequestHandlerInterface
      * This method duplicates `next()` to provide backwards compatibility with non-PSR 15 middleware.
      * @param ServerRequestInterface $request
      * @return ResponseInterface
+     * @throws \InvalidArgumentException
      */
     public function __invoke(ServerRequestInterface $request)
     {

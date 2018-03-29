@@ -82,8 +82,8 @@ $chain = new MiddlewareStack([
         return $res;
     },
     function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
-//        $res = HttpFactory::createResponse();
-//        $res->getBody()->write('content');
+        // $res = HttpFactory::createResponse();
+        // $res->getBody()->write('content');
 
         echo ">>> 4 before \n";
         $res = $handler->handle($request);
