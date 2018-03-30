@@ -66,6 +66,8 @@ class MiddlewareStack implements RequestHandlerInterface
      * This method duplicates `next()` to provide backwards compatibility with non-PSR 15 middleware.
      * @param ServerRequestInterface $request
      * @return ResponseInterface
+     * @throws \UnexpectedValueException
+     * @throws \RuntimeException
      * @throws \InvalidArgumentException
      */
     public function __invoke(ServerRequestInterface $request)

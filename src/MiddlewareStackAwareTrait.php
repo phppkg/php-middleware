@@ -16,6 +16,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 /**
  * Trait MiddlewareChainAwareTrait
  * @package Inhere\Middleware
+ * @author inhere <in.798@qq.com>
  *
  * ```php
  * class MyApp implements RequestHandlerInterface {
@@ -52,13 +53,28 @@ trait MiddlewareStackAwareTrait
     /**
      * Add middleware
      * This method prepends new middleware to the application middleware stack.
-     * @param array ...$middleware Any callable that accepts two arguments:
+     * @param array ...$middlewareList Any callable that accepts two arguments:
      *                           1. A Request object
      *                           2. A Handler object
      * @return $this
      * @throws \RuntimeException
      */
-    public function add(...$middleware): self
+    public function add(...$middlewareList): self
+    {
+        foreach ($middlewareList as $middleware) {
+            $this->middle($middleware);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param $middleware
+     * param string|null $name
+     * @return self
+     * @throws \RuntimeException
+     */
+    public function middle($middleware): self
     {
         if ($this->locked) {
             throw new \RuntimeException('Middleware can’t be added once the stack is dequeuing');
@@ -68,9 +84,12 @@ trait MiddlewareStackAwareTrait
             $this->prepareStack();
         }
 
-        foreach ($middleware as $item) {
-            $this->stack[] = $item;
-        }
+        // if ($name) {
+        //     // SplStack don't allow string key.
+        //     $this->stack[$name] = $middleware;
+        // } else {
+            $this->stack[] = $middleware;
+        // }
 
         return $this;
     }
@@ -117,8 +136,11 @@ trait MiddlewareStackAwareTrait
         }
 
         $middleware = $this->stack->shift();
-        // $middleware = current($handler->stack);
-        // next($handler->stack);
+
+        // if is a class name
+        if (\is_string($middleware) && \class_exists($middleware)) {
+            $middleware = new $middleware;
+        }
 
         if ($middleware instanceof MiddlewareInterface) {
             /** @var RequestHandlerInterface $this */
