@@ -81,24 +81,13 @@ $chain = new MiddlewareStack([
         echo "3 after >>> \n";
         return $res;
     },
-    function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
-        // $res = HttpFactory::createResponse();
-        // $res->getBody()->write('content');
-
-        echo ">>> 4 before \n";
-        $res = $handler->handle($request);
-        $res->getBody()->write('node 4');
-        echo "4 after >>> \n";
-
-        return $res;
-    },
     'func_middleware1'
 ]);
 
 $request = HttpFactory::createServerRequest('GET', 'http://www.abc.com/home');
 
 $chain->setCoreHandler(function (ServerRequestInterface $request) {
-    echo " (this is core)\n";
+    echo " (THIS IS CORE)\n";
 
     return HttpFactory::createResponse()->write('-CORE-');
 });
@@ -116,11 +105,9 @@ $ php examples/test.php
 >>> 1 before
 >>> 2 before
 >>> 3 before
->>> 4 before
 >>> n before
- (this is core)
+ (THIS IS CORE)
 n after >>>
-4 after >>>
 3 after >>>
 2 after >>>
 1 after >>>

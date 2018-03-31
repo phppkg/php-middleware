@@ -74,16 +74,16 @@ $chain = new MiddlewareStack([
 $request = HttpFactory::createServerRequest('GET', 'http://www.abc.com/home');
 
 $chain->setCoreHandler(function () {
-    echo " (this is core)\n";
+    echo " (THIS IS CORE)\n";
     $res = HttpFactory::createResponse();
-    $res->getBody()->write('-CORE-');
+    $res->getBody()->write(' (CORE) ');
 
     return $res;
 });
 
 $res = $chain($request);
 
-echo PHP_EOL . 'response content: ', (string)$res->getBody() . PHP_EOL;
+echo PHP_EOL . 'response content:', (string)$res->getBody() . PHP_EOL;
 
 //var_dump($chain);
 
@@ -96,7 +96,7 @@ $ php examples/test.php
 >>> 3 before
 >>> 4 before
 >>> n before
- (this is core)
+ (THIS IS CORE)
 n after >>>
 4 after >>>
 3 after >>>

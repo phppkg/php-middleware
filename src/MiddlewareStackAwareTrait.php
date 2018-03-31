@@ -41,6 +41,7 @@ trait MiddlewareStackAwareTrait
     private $callableResolver;
 
     /**
+     * Add middleware
      * @param callable[] ...$middleware
      * @return $this
      * @throws \RuntimeException
@@ -95,6 +96,7 @@ trait MiddlewareStackAwareTrait
     }
 
     /**
+     * Call this method to start executing all middleware
      * 调用此方法开始执行所有中间件
      * @param ServerRequestInterface $request
      * @return ResponseInterface
@@ -110,7 +112,7 @@ trait MiddlewareStackAwareTrait
 
         $this->locked = true;
 
-        // 保证每次的调用栈是完整且从0开始
+        //NOTICE: 'clone' Ensure that each call stack is complete and starts at 0
         $that = clone $this;
         $response = $that->handle($request);
 
@@ -120,6 +122,7 @@ trait MiddlewareStackAwareTrait
     }
 
     /**
+     * Do not call directly externally, internally called
      * 不要在外部直接调用，内部调用的
      * @internal
      * {@inheritDoc}
@@ -128,8 +131,6 @@ trait MiddlewareStackAwareTrait
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        // $handler = clone $this;
-
         // IMPORTANT: if no middleware. this is end point of the chain.
         if ($this->stack->isEmpty()) {
             return $this->handleRequest($request);
@@ -164,6 +165,7 @@ trait MiddlewareStackAwareTrait
     }
 
     /**
+     * Process request here to return a response object
      * 在这里处理请求返回响应对象
      * @param ServerRequestInterface $request
      * @return ResponseInterface
@@ -210,5 +212,13 @@ trait MiddlewareStackAwareTrait
     public function getCallableResolver(): CallableResolverInterface
     {
         return $this->callableResolver;
+    }
+
+    /**
+     * @return \SplStack
+     */
+    public function getStack(): \SplStack
+    {
+        return $this->stack;
     }
 }
