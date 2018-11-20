@@ -9,8 +9,8 @@
 use Inhere\Http\HttpFactory;
 use Inhere\Http\HttpUtil;
 use Inhere\Middleware\MiddlewareStackAwareTrait;
-use Inhere\Route\Base\RouterInterface;
-use Inhere\Route\ORouter;
+use Inhere\Route\RouterInterface;
+use Inhere\Route\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -22,7 +22,7 @@ $app = new class implements RequestHandlerInterface
     use MiddlewareStackAwareTrait;
 
     /**
-     * @var ORouter
+     * @var Router
      */
     private $router;
 

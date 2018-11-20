@@ -170,7 +170,7 @@ trait MiddlewareStackAwareTrait
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      */
-    abstract public function handleRequest(ServerRequestInterface $request): ResponseInterface;
+    abstract protected function handleRequest(ServerRequestInterface $request): ResponseInterface;
 
     /**
      * @param callable|null $kernel

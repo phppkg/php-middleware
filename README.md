@@ -126,8 +126,8 @@ response content: node 4 + node 3 + node 2 + node 1
 use Inhere\Http\HttpFactory;
 use Inhere\Http\HttpUtil;
 use Inhere\Middleware\MiddlewareStackAwareTrait;
-use Inhere\Route\Base\RouterInterface;
-use Inhere\Route\ORouter;
+use Inhere\Route\RouterInterface;
+use Inhere\Route\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -141,7 +141,7 @@ $app = new class implements RequestHandlerInterface {
     use MiddlewareStackAwareTrait;
 
     /**
-     * @var ORouter
+     * @var Router
      */
     private $router;
 
@@ -149,7 +149,7 @@ $app = new class implements RequestHandlerInterface {
     {
         $response = $this->callStack($request);
 
-        Http::respond($response);
+        HttpUtil::respond($response);
     }
 
     /**
@@ -196,7 +196,7 @@ $app = new class implements RequestHandlerInterface {
 ### 创建路由器并注册路由
 
 ```php
-$router = new ORouter();
+$router = new Inhere\Route\Router();
 
 /**
  * add routes

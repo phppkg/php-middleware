@@ -38,7 +38,7 @@ class MiddlewareTest extends TestCase
         $res = $stack(HttpFactory::createServerRequest('GET', '/test'));
         $body = (string)$res->getBody();
 
-        echo "\n\nThe Result:\n\n $body";
+        // echo "\n\nThe Result:\n\n $body";
 
         $this->assertStringStartsWith('func0 >', $body);
         $this->assertStringEndsWith('> func0', $body);
