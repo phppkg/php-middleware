@@ -6,8 +6,8 @@
  * Time: 15:30
  */
 
-use Inhere\Http\HttpFactory;
-use Inhere\Http\HttpUtil;
+use PhpComp\Http\Message\HttpFactory;
+use PhpComp\Http\Message\HttpUtil;
 use Inhere\Middleware\MiddlewareStackAwareTrait;
 use Inhere\Route\RouterInterface;
 use Inhere\Route\Router;

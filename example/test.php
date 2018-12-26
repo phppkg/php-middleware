@@ -6,7 +6,7 @@
  * Time: 下午10:04
  */
 
-use Inhere\Http\HttpFactory;
+use PhpComp\Http\Message\HttpFactory;
 use Inhere\Middleware\MiddlewareStack;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;

@@ -2,7 +2,13 @@
   "name": "inhere/middleware",
   "type": "library",
   "description": "the psr-15, psr-7 middleware library of the php",
-  "keywords": ["library","middleware","middleware-dispatcher","psr-15","psr-7"],
+  "keywords": [
+    "library",
+    "middleware",
+    "middleware-dispatcher",
+    "psr-15",
+    "psr-7"
+  ],
   "homepage": "https://github.com/inhere/php-middleware",
   "license": "MIT",
   "authors": [
@@ -13,7 +19,7 @@
     }
   ],
   "require": {
-    "php": ">7.0.0",
+    "php": ">7.1.0",
     "psr/http-server-middleware": "^1.0"
   },
   "require-dev": {
@@ -21,12 +27,11 @@
   },
   "autoload": {
     "psr-4": {
-      "Inhere\\Middleware\\" : "src/"
+      "Inhere\\Middleware\\": "src/"
     }
   },
   "suggest": {
     "inhere/sroute": "Very lightweight and fast router",
-    "inhere/php-validate": "Very lightweight data validate tool library",
-    "inhere/console": "a lightweight php console application library."
+    "inhere/php-validate": "Very lightweight data validate tool library"
   }
 }

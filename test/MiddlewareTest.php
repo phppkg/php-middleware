@@ -8,7 +8,7 @@
 
 namespace Inhere\Middleware\Test;
 
-use Inhere\Http\HttpFactory;
+use PhpComp\Http\Message\HttpFactory;
 use Inhere\Middleware\MiddlewareStack;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;

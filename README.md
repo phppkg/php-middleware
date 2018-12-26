@@ -123,8 +123,8 @@ response content: node 4 + node 3 + node 2 + node 1
 路由器，psr 7的http message 库
 
 ```php
-use Inhere\Http\HttpFactory;
-use Inhere\Http\HttpUtil;
+use PhpComp\Http\Message\HttpFactory;
+use PhpComp\Http\Message\HttpUtil;
 use Inhere\Middleware\MiddlewareStackAwareTrait;
 use Inhere\Route\RouterInterface;
 use Inhere\Route\Router;
