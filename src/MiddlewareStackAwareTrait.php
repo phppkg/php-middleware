@@ -106,6 +106,10 @@ trait MiddlewareStackAwareTrait
      */
     public function callStack(ServerRequestInterface $request): ResponseInterface
     {
+        if ($this->locked) {
+            throw new \RuntimeException('Middleware stack can’t be start once the stack is dequeuing');
+        }
+
         if (null === $this->stack) {
             $this->prepareStack();
         }
